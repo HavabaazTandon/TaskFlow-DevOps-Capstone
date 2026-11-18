@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        TASKFLOW_SECRET = credentials('taskflow-app-secret')
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -23,7 +27,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh '.venv/bin/python -m pytest -v'
+                sh 'test -n "$TASKFLOW_SECRET" && SECRET_KEY="$TASKFLOW_SECRET" .venv/bin/python -m pytest -v'
             }
         }
 
