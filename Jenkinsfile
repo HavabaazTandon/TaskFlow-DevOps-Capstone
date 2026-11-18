@@ -4,20 +4,26 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/HavabaazTandon/TaskFlow-DevOps-Capstone.git'
+                checkout scm
+            }
+        }
+
+        stage('Create Python Environment') {
+            steps {
+                sh 'python3 -m venv .venv'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'python3 -m pip install --break-system-packages -r requirements.txt'
+                sh '.venv/bin/pip install --upgrade pip'
+                sh '.venv/bin/pip install -r requirements.txt'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'python3 -m pytest -v'
+                sh '.venv/bin/python -m pytest -v'
             }
         }
 
