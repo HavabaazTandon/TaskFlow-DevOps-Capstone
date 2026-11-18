@@ -1,0 +1,280 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard | TaskFlow</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+<div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h3 class="brand">✦ TaskFlow</h3>
+        <p class="sidebar-label">WORKSPACE</p>
+
+        <a href="{{ url_for('dashboard') }}" class="nav-link active">
+            <span>▦</span> Dashboard
+        </a>
+
+        <a href="#tasks" class="nav-link">
+            <span>✓</span> My Tasks
+        </a>
+
+        <div class="sidebar-bottom">
+            <div class="user-info">
+                <div class="user-avatar">
+                    {{ current_user.username[0]|upper }}
+                </div>
+                <div>
+                    <strong>{{ current_user.username }}</strong>
+                    <small>Student Account</small>
+                </div>
+            </div>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                ↪ Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <header class="top-header">
+            <div>
+                <p class="eyebrow">WORKSPACE OVERVIEW</p>
+                <h2>Dashboard</h2>
+                <p>Manage your daily tasks and stay productive.</p>
+            </div>
+
+            <div class="welcome-badge">
+                <span class="online-dot"></span>
+                Welcome, {{ current_user.username }}
+            </div>
+        </header>
+
+        <!-- WELCOME BANNER -->
+        <section class="welcome-section">
+            <div>
+                <span class="welcome-tag">YOUR PERSONAL WORKSPACE</span>
+                <h3>Good to see you, {{ current_user.username }}! 👋</h3>
+                <p>Stay focused, organize your work and achieve your goals.</p>
+            </div>
+
+            <div class="welcome-icon">✓</div>
+        </section>
+
+        <!-- TASK COUNTS -->
+        {% set total_count = tasks|length %}
+        {% set completed_count = tasks|selectattr('completed')|list|length %}
+        {% set pending_count = total_count - completed_count %}
+
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon blue">▦</div>
+                    <span class="stat-caption">ALL TASKS</span>
+                </div>
+                <p>Total Tasks</p>
+                <h2>{{ total_count }}</h2>
+                <small>Your complete task list</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon orange">◷</div>
+                    <span class="stat-caption">IN PROGRESS</span>
+                </div>
+                <p>Pending Tasks</p>
+                <h2>{{ pending_count }}</h2>
+                <small>Tasks waiting to be completed</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon green">✓</div>
+                    <span class="stat-caption">FINISHED</span>
+                </div>
+                <p>Completed Tasks</p>
+                <h2>{{ completed_count }}</h2>
+                <small>Tasks successfully completed</small>
+            </div>
+
+        </section>
+
+        <!-- PROGRESS SECTION -->
+        <section class="progress-card">
+            <div class="progress-heading">
+                <div>
+                    <h4>Overall Progress</h4>
+                    <p>Track your productivity at a glance.</p>
+                </div>
+
+                <strong>
+                    {{ ((completed_count / total_count) * 100)|round|int if total_count else 0 }}%
+                </strong>
+            </div>
+
+            <div class="custom-progress">
+                <div class="custom-progress-fill"
+                     style="width: {{ (completed_count / total_count * 100) if total_count else 0 }}%">
+                </div>
+            </div>
+
+            <small>{{ completed_count }} of {{ total_count }} tasks completed</small>
+        </section>
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <div class="alert alert-info">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <!-- TASKS AND ADD TASK -->
+        <section class="content-grid" id="tasks">
+
+            <!-- TASK LIST -->
+            <div class="task-section">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="section-eyebrow">YOUR WORK</span>
+                        <h4>My Tasks</h4>
+                        <p>Keep track of everything you need to do.</p>
+                    </div>
+
+                    <span class="task-count">{{ total_count }} Tasks</span>
+                </div>
+
+                {% for task in tasks %}
+
+                <div class="task-card">
+
+                    <div class="task-details">
+                        <div class="task-title-row">
+                            <span class="task-indicator {% if task.completed %}indicator-done{% else %}indicator-pending{% endif %}"></span>
+
+                            <h5 class="{% if task.completed %}completed-title{% endif %}">
+                                {{ task.title }}
+                            </h5>
+                        </div>
+
+                        <p>
+                            {{ task.description or "No description provided." }}
+                        </p>
+
+                        <span class="status {% if task.completed %}done{% else %}pending{% endif %}">
+                            {{ "✓ Completed" if task.completed else "◷ Pending" }}
+                        </span>
+                    </div>
+
+                    <div class="task-actions">
+
+                        <form method="POST"
+                              action="{{ url_for('complete_task', task_id=task.id) }}">
+                            <button type="submit" class="action-btn complete-btn">
+                                {{ "Undo" if task.completed else "✓ Complete" }}
+                            </button>
+                        </form>
+
+                        <a href="{{ url_for('edit_task', task_id=task.id) }}"
+                           class="action-btn edit-btn">
+                            Edit
+                        </a>
+
+                        <form method="POST"
+                              action="{{ url_for('delete_task', task_id=task.id) }}"
+                              onsubmit="return confirm('Are you sure you want to delete this task?')">
+                            <button type="submit" class="action-btn delete-btn">
+                                Delete
+                            </button>
+                        </form>
+
+                    </div>
+
+                </div>
+
+                {% else %}
+
+                <div class="empty-state">
+                    <div class="empty-icon">✓</div>
+                    <h5>No tasks yet</h5>
+                    <p>Your workspace is ready. Add your first task to get started!</p>
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <!-- ADD TASK FORM -->
+            <div class="add-section">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="section-eyebrow">GET STARTED</span>
+                        <h4>Add New Task</h4>
+                        <p>Create and organize your next task.</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('add_task') }}">
+
+                    <label for="title">Task Title</label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        class="form-control"
+                        placeholder="Enter task title"
+                        maxlength="200"
+                        required
+                    >
+
+                    <label for="description">Description</label>
+                    <textarea
+                        id="description"
+                        name="description"
+                        class="form-control"
+                        rows="5"
+                        maxlength="500"
+                        placeholder="Describe your task..."
+                    ></textarea>
+
+                    <button type="submit" class="add-button">
+                        + Add New Task
+                    </button>
+
+                </form>
+
+                <div class="form-tip">
+                    <span>💡</span>
+                    <p>Tip: Break large projects into smaller tasks to stay organized.</p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <span>✦ TaskFlow</span>
+            <span>DevOps Capstone Project · Built for productivity</span>
+        </footer>
+
+    </main>
+</div>
+</body>
+</html>
