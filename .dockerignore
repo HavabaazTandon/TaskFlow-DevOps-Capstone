@@ -1,6 +1,14 @@
-venv/
-.git/
-__pycache__/
+.venv
+venv
+.git
+__pycache__
+.pytest_cache
 *.pyc
 *.zip
 backup/
+instance/
+terraform/.terraform/
+terraform/*.tfstate*
+terraform/*.tfvars
+terraform/tfplan
+docs/screenshots/
