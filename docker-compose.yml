@@ -5,9 +5,12 @@ services:
     ports:
       - "5002:5002"
     environment:
-      SECRET_KEY: ${SECRET_KEY:-taskflow-docker-secret}
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY before starting Compose}
+      FLASK_HOST: 0.0.0.0
+      LOG_DIR: /app/logs
     volumes:
       - ./instance:/app/instance
+      - /mnt/c/DevOps-Lab3/elk/logs:/app/logs
     restart: unless-stopped
 
   jenkins:
@@ -24,5 +27,31 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: taskflow-prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - taskflow
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: taskflow-grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
 volumes:
   jenkins_home:
+  prometheus_data:
+  grafana_data:

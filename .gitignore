@@ -7,3 +7,20 @@ instance/
 .coverage
 *.zip
 backup/
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfvars
+terraform/crash.log
+.secrets/
+
+# Local development files
+.venv/
+.scannerwork/
+logs/
+*.backup
+*.bak
+*-backup
+terraform/tfplan

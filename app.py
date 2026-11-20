@@ -4,10 +4,37 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import json
+import logging
+from datetime import datetime, timezone
+from prometheus_flask_exporter import PrometheusMetrics
+from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "task-manager-dev-key")
+# taskflow_json_logging
+LOG_DIR = os.environ.get("LOG_DIR", os.path.join(os.path.dirname(__file__), "logs"))
+os.makedirs(LOG_DIR, exist_ok=True)
+
+class JSONLogFormatter(logging.Formatter):
+    def format(self, record):
+        return json.dumps({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "level": record.levelname,
+            "service": "taskflow",
+            "message": record.getMessage()
+        })
+
+log_handler = logging.FileHandler(os.path.join(LOG_DIR, "taskflow.jsonl"))
+log_handler.setFormatter(JSONLogFormatter())
+app.logger.addHandler(log_handler)
+app.logger.setLevel(logging.INFO)
+app.logger.info("TaskFlow application logging initialized")
+metrics = PrometheusMetrics(app)
+
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+app.config["WTF_CSRF_ENABLED"] = True
+csrf = CSRFProtect(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tasks.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -181,4 +208,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
 
-    app.run(host="0.0.0.0", port=5002, debug=False)
+    app.run(host=os.environ.get("FLASK_HOST", "127.0.0.1"), port=5002, debug=False)

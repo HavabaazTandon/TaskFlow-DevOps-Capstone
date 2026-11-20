@@ -1,0 +1,23 @@
+---
+- name: Deploy TaskFlow to Kubernetes
+  hosts: local
+  tasks:
+    - name: Apply ConfigMap
+      command: kubectl apply -f k8s/configmap.yaml
+      args:
+        chdir: "{{ playbook_dir }}/../.."
+
+    - name: Apply storage resources
+      command: kubectl apply -f k8s/storage.yaml
+      args:
+        chdir: "{{ playbook_dir }}/../.."
+
+    - name: Apply application deployment
+      command: kubectl apply -f k8s/deployment.yaml
+      args:
+        chdir: "{{ playbook_dir }}/../.."
+
+    - name: Wait for TaskFlow rollout
+      command: kubectl rollout status deployment/taskflow
+      args:
+        chdir: "{{ playbook_dir }}/../.."

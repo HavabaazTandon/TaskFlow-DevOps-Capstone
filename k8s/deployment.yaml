@@ -31,6 +31,10 @@ spec:
                 configMapKeyRef:
                   name: taskflow-config
                   key: APP_ENV
+            - name: FLASK_HOST
+              value: "0.0.0.0"
+            - name: LOG_DIR
+              value: "/app/logs"
           volumeMounts:
             - name: taskflow-storage
               mountPath: /app/instance
