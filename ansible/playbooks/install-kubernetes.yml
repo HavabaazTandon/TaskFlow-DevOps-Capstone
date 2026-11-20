@@ -2,27 +2,19 @@
 - name: Install Kubernetes tools
   hosts: local
   become: true
-  tasks:
-    - name: Check kubectl
-      stat:
-        path: /usr/local/bin/kubectl
-      register: kubectl_binary
 
-    - name: Install kubectl
+  tasks:
+    - name: Install compatible kubectl
       get_url:
-        url: https://dl.k8s.io/release/v1.35.10/bin/linux/amd64/kubectl
+        url: https://dl.k8s.io/release/v1.37.0/bin/linux/amd64/kubectl
         dest: /usr/local/bin/kubectl
         mode: '0755'
-      when: not kubectl_binary.stat.exists
 
-    - name: Check Minikube
-      stat:
-        path: /usr/local/bin/minikube
-      register: minikube_binary
+    - name: Verify kubectl installation
+      command: /usr/local/bin/kubectl version --client
+      register: kubectl_version
+      changed_when: false
 
-    - name: Install Minikube
-      get_url:
-        url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-        dest: /usr/local/bin/minikube
-        mode: '0755'
-      when: not minikube_binary.stat.exists
+    - name: Display kubectl version
+      debug:
+        msg: "{{ kubectl_version.stdout }}"
