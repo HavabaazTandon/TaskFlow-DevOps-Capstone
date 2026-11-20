@@ -2,7 +2,7 @@
   "title": "TaskFlow Application Monitoring",
   "uid": "taskflow-monitor",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "10s",
   "panels": [
     {
@@ -41,7 +41,7 @@
     },
     {
       "id": 3,
-      "title": "HTTP Request Duration",
+      "title": "HTTP Request Duration (p95)",
       "type": "timeseries",
       "gridPos": {
         "h": 8,
@@ -58,7 +58,7 @@
     },
     {
       "id": 4,
-      "title": "Prometheus Scrape Status",
+      "title": "TaskFlow Application Status",
       "type": "stat",
       "gridPos": {
         "h": 8,
@@ -71,7 +71,154 @@
           "expr": "up{job=\"taskflow\"}",
           "legendFormat": "TaskFlow"
         }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": []
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Container CPU Usage",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(container_cpu_usage_seconds_total{id=~\".*docker-3809737c19f08d36227dfe9d9504c9950ac378ac2de3dab3b850b261e7375109\\\\.scope$\"}[5m])",
+          "legendFormat": "TaskFlow App"
+        },
+        {
+          "refId": "B",
+          "expr": "rate(container_cpu_usage_seconds_total{id=~\".*docker-296cde5c90f54878c60fcc0f693314da1acbc4adeedb5ac30b06a95009f0391e\\\\.scope$\"}[5m])",
+          "legendFormat": "Prometheus"
+        },
+        {
+          "refId": "C",
+          "expr": "rate(container_cpu_usage_seconds_total{id=~\".*docker-63c35a98c96286a88294db12c380baf98c5533679c3e2fc3910dc5686064e154\\\\.scope$\"}[5m])",
+          "legendFormat": "Grafana"
+        },
+        {
+          "refId": "D",
+          "expr": "rate(container_cpu_usage_seconds_total{id=~\".*docker-7729d9c8987de14974b92e39e325f12e4e336881b1154e2c29690078aff73836\\\\.scope$\"}[5m])",
+          "legendFormat": "Jenkins"
+        },
+        {
+          "refId": "E",
+          "expr": "rate(container_cpu_usage_seconds_total{id=~\".*docker-036e45e2d8c4f171daea67931fc78fa8dff6cc105c9273cfcd10e921e489aa6f\\\\.scope$\"}[5m])",
+          "legendFormat": "cAdvisor"
+        },
+        {
+          "refId": "F",
+          "expr": "rate(container_cpu_usage_seconds_total{id=~\".*docker-ad155414b32d096fbc5ccb8d883fb019cd68ade2661b6a591a2dc988c64f7c30\\\\.scope$\"}[5m])",
+          "legendFormat": "Node Exporter"
+        }
       ]
+    },
+    {
+      "id": 6,
+      "title": "Container Memory Usage (MiB)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "container_memory_working_set_bytes{id=~\".*docker-3809737c19f08d36227dfe9d9504c9950ac378ac2de3dab3b850b261e7375109\\\\.scope$\"} / 1024 / 1024",
+          "legendFormat": "TaskFlow App"
+        },
+        {
+          "refId": "B",
+          "expr": "container_memory_working_set_bytes{id=~\".*docker-296cde5c90f54878c60fcc0f693314da1acbc4adeedb5ac30b06a95009f0391e\\\\.scope$\"} / 1024 / 1024",
+          "legendFormat": "Prometheus"
+        },
+        {
+          "refId": "C",
+          "expr": "container_memory_working_set_bytes{id=~\".*docker-63c35a98c96286a88294db12c380baf98c5533679c3e2fc3910dc5686064e154\\\\.scope$\"} / 1024 / 1024",
+          "legendFormat": "Grafana"
+        },
+        {
+          "refId": "D",
+          "expr": "container_memory_working_set_bytes{id=~\".*docker-7729d9c8987de14974b92e39e325f12e4e336881b1154e2c29690078aff73836\\\\.scope$\"} / 1024 / 1024",
+          "legendFormat": "Jenkins"
+        },
+        {
+          "refId": "E",
+          "expr": "container_memory_working_set_bytes{id=~\".*docker-036e45e2d8c4f171daea67931fc78fa8dff6cc105c9273cfcd10e921e489aa6f\\\\.scope$\"} / 1024 / 1024",
+          "legendFormat": "cAdvisor"
+        },
+        {
+          "refId": "F",
+          "expr": "container_memory_working_set_bytes{id=~\".*docker-ad155414b32d096fbc5ccb8d883fb019cd68ade2661b6a591a2dc988c64f7c30\\\\.scope$\"} / 1024 / 1024",
+          "legendFormat": "Node Exporter"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Host CPU Usage (%)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "targets": [
+        {
+          "expr": "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+          "legendFormat": "CPU Usage"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Host Memory Usage (%)",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "targets": [
+        {
+          "expr": "100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
+          "legendFormat": "Memory Usage"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Monitoring Target Health",
+      "type": "stat",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 32
+      },
+      "targets": [
+        {
+          "expr": "up",
+          "legendFormat": "{{job}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": []
+        }
+      }
     }
   ]
 }
