@@ -24,3 +24,6 @@ logs/
 *.bak
 *-backup
 terraform/tfplan
+
+# Generated coverage report
+coverage.xml
