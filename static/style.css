@@ -1354,3 +1354,51 @@ button, input, textarea {
         align-items: flex-start;
     }
 }
+
+/* Keep dashboard sidebar navigation and logout visible */
+@media (max-height: 850px) {
+    .sidebar {
+        box-sizing: border-box;
+        height: 100vh;
+        overflow-y: auto;
+        padding-top: 20px;
+        padding-bottom: 12px;
+    }
+
+    .brand {
+        margin-bottom: 26px;
+    }
+
+    .sidebar-label {
+        margin-bottom: 8px;
+    }
+
+    .sidebar .nav-link {
+        padding: 10px 12px;
+        margin-bottom: 4px;
+    }
+
+    .user-info {
+        padding: 10px 5px;
+    }
+
+    .logout-link {
+        padding: 10px 12px;
+    }
+}
+
+/* Unified TaskFlow sidebar across dashboard and workspace */
+@media (min-width: 801px) {
+    .app-layout > .sidebar {
+        height: 100vh;
+        box-sizing: border-box;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .app-layout > .sidebar .sidebar-bottom {
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+}

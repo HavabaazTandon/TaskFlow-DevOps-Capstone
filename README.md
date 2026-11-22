@@ -52,7 +52,7 @@ The project combines application development with automated testing, packaging, 
 - Automated source checkout and dependency installation.
 - Integrated automated application testing.
 - Automated Docker image building.
-- Configured SCM polling for repository changes.
+- Configured the Jenkins pipeline to run checkout, tests and Docker image builds. Automatic push-trigger behaviour must be verified in the Jenkins job configuration.
 
 ### Phase 3 – Docker
 - Created a Dockerfile for the Flask application.
@@ -103,10 +103,7 @@ Created playbooks for:
 - Tested deployment switching and rollback.
 
 ### Phase 11 – GitOps with ArgoCD
-- Integrated ArgoCD with the GitHub repository.
-- Configured automated synchronization.
-- Enabled self-healing.
-- Verified application synchronization and health status.
+- GitOps is part of the project scope. The repository does not currently contain an ArgoCD Application manifest, so repository-managed synchronization is not claimed as complete.
 
 ## 5. Repository Structure
 
@@ -120,7 +117,8 @@ Created playbooks for:
 - `logging/` – Fluent Bit and Logstash configurations
 - `templates/` and `static/` – Application interface
 - `tests/` – Automated tests
-- `docs/` – Project documentation
+- `docs/architecture.md` – Mermaid system architecture diagram
+- `docs/` – Project documentation and workflow evidence
 - `start-demo.sh` – Local demo startup script
 
 ## 6. Prerequisites
@@ -203,7 +201,11 @@ Check Fluent Bit: `kubectl get daemonset fluent-bit -n logging`
 
 Check ArgoCD applications: `kubectl get applications -n argocd`
 
-## 11. Security Notes
+## 11. Architecture
+
+See [System Architecture](docs/architecture.md) for the Mermaid architecture diagram and component relationships.
+
+## 12. Security Notes
 
 - Application secrets are stored locally and excluded from Git.
 - Terraform state and local variable files are excluded from Git.
@@ -213,16 +215,17 @@ Check ArgoCD applications: `kubectl get applications -n argocd`
 - SonarQube is used for static code analysis.
 - Never commit passwords, tokens, secret keys, database files or Terraform state files.
 
-## 12. Project Outcomes
+## 13. Project Outcomes
 
-The project demonstrates an integrated DevOps workflow covering source control, automated testing, containerization, Kubernetes orchestration, infrastructure automation, monitoring, centralized logging, security, Blue-Green deployment and GitOps.
+The repository contains the TaskFlow application and configurations for source control, automated testing, containerization, Kubernetes orchestration, infrastructure automation, monitoring, centralized logging, security analysis and Blue-Green deployment. Jenkins execution has been evidenced; automatic push triggering and repository-managed GitOps still require verification.
 
-## 13. Future Scope
+## 14. Future Scope
 
-- Integrate GitHub webhook-based pipeline triggers.
+- Verify and configure automatic Jenkins triggers for every GitHub push.
 - Improve automated security scanning and vulnerability remediation.
 - Expand monitoring alerts and application metrics.
 - Introduce automated backup and disaster recovery.
+- Complete and verify repository-managed GitOps using ArgoCD or FluxCD.
 - Improve deployment automation and operational dashboards.
 
 ---
