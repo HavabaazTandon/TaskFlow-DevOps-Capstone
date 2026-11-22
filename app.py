@@ -19,7 +19,7 @@ app = Flask(__name__)
 # Application configuration
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["WTF_CSRF_ENABLED"] = True
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tasks.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("TASKFLOW_DATABASE_URI", "sqlite:///tasks.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
