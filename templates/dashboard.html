@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard | TaskFlow</title>
+    <title>TaskFlow | Task Management</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
@@ -21,11 +22,43 @@
         <p class="sidebar-label">WORKSPACE</p>
 
         <a href="{{ url_for('dashboard') }}" class="nav-link active">
-            <span>▦</span> Dashboard
+            <span>▦</span> Overview
         </a>
 
-        <a href="#tasks" class="nav-link">
+        <a href="{{ url_for('my_tasks') }}" class="nav-link">
             <span>✓</span> My Tasks
+        </a>
+
+        <a href="{{ url_for('add_task_page') }}" class="nav-link">
+            <span>＋</span> Add Task
+        </a>
+
+        <a href="{{ url_for('completed_tasks') }}" class="nav-link">
+            <span>✓</span> Completed
+        </a>
+
+        <p class="sidebar-label">PRODUCTIVITY</p>
+
+        <a href="{{ url_for('analytics_page') }}" class="nav-link">
+            <span>▥</span> Analytics
+        </a>
+
+        <a href="{{ url_for('calendar') }}" class="nav-link">
+            <span>▦</span> Calendar
+        </a>
+
+        <a href="{{ url_for('activity_page') }}" class="nav-link">
+            <span>◷</span> Activity
+        </a>
+
+        <p class="sidebar-label">ACCOUNT</p>
+
+        <a href="{{ url_for('profile') }}" class="nav-link">
+            <span>◎</span> Profile
+        </a>
+
+        <a href="{{ url_for('settings_page') }}" class="nav-link">
+            <span>⚙</span> Settings
         </a>
 
         <div class="sidebar-bottom">
@@ -110,6 +143,16 @@
                 <small>Tasks successfully completed</small>
             </div>
 
+            <div class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-icon">↗</div>
+                    <span class="stat-caption">PRODUCTIVITY</span>
+                </div>
+                <p>Completion Rate</p>
+                <h2>{{ productivity }}%</h2>
+                <small>Overall task progress</small>
+            </div>
+
         </section>
 
         <!-- PROGRESS SECTION -->
@@ -143,6 +186,139 @@
             {% endfor %}
         {% endwith %}
 
+
+        <!-- DAILY FOCUS AND WEEKLY GOALS -->
+        <section class="feature-grid">
+            <article class="feature-card" id="daily-focus">
+                <span class="section-eyebrow">STAY ON TRACK</span>
+                <h4>Daily Focus</h4>
+                <p>Today's priorities: <strong>{{ today_tasks|length }}</strong></p>
+                {% for task in today_tasks %}
+                <div class="mini-task">
+                    <span>{{ task.title }}</span>
+                    <strong class="priority-{{ (task.priority or 'Medium')|lower }}">{{ task.priority or 'Medium' }}</strong>
+                </div>
+                {% else %}
+                <p class="muted-text">No tasks due today. Add a due date to set your priorities.</p>
+                {% endfor %}
+                <div class="focus-timer">
+                    <strong id="timerDisplay">25:00</strong>
+                    <button type="button" class="action-btn complete-btn" id="timerStart">Start</button>
+                    <button type="button" class="action-btn edit-btn" id="timerReset">Reset</button>
+                    <small>25-minute focus session</small>
+                </div>
+            </article>
+
+            <article class="feature-card" id="goals">
+                <span class="section-eyebrow">WEEKLY TARGET</span>
+                <h4>Goals &amp; Milestones</h4>
+                <p>Tasks completed this week</p>
+                <h2>{{ weekly_completed }} / {{ weekly_goal }}</h2>
+                <div class="custom-progress">
+                    <div class="custom-progress-fill" style="width: {{ [weekly_completed * 100 / weekly_goal, 100]|min }}%"></div>
+                </div>
+                <p class="muted-text">{{ [weekly_goal - weekly_completed, 0]|max }} tasks remaining to reach your weekly goal.</p>
+            </article>
+        </section>
+
+
+        <!-- DEADLINES AND RECENT ACTIVITY -->
+        <section class="feature-grid">
+            <article class="feature-card" id="calendar">
+                <span class="section-eyebrow">PLAN AHEAD</span>
+                <h4>Upcoming Deadlines</h4>
+                {% if overdue_tasks %}
+                <p class="deadline-warning">⚠ {{ overdue_tasks|length }} overdue task(s) need attention.</p>
+                {% endif %}
+                {% for task in upcoming_tasks %}
+                <div class="mini-task">
+                    <span><strong>{{ task.title }}</strong><small>{{ task.priority or 'Medium' }} priority</small></span>
+                    <span>{{ task.due_date.strftime('%d %b %Y') }}</span>
+                </div>
+                {% else %}
+                <p class="muted-text">No upcoming deadlines. Add due dates to your tasks.</p>
+                {% endfor %}
+                {% for task in overdue_tasks %}
+                <div class="mini-task overdue-task">
+                    <span><strong>{{ task.title }}</strong><small>Overdue</small></span>
+                    <span>{{ task.due_date.strftime('%d %b %Y') }}</span>
+                </div>
+                {% endfor %}
+            </article>
+
+            <article class="feature-card" id="activity">
+                <span class="section-eyebrow">YOUR WORK HISTORY</span>
+                <h4>Recent Activity</h4>
+                {% for item in recent_activity %}
+                <div class="mini-task">
+                    <span><strong>{{ item.action|title }}</strong><small>{{ item.details }}</small></span>
+                    <small>{{ item.created_at.strftime('%d %b, %I:%M %p') }}</small>
+                </div>
+                {% else %}
+                <p class="muted-text">Your activity will appear here as you manage tasks.</p>
+                {% endfor %}
+            </article>
+        </section>
+
+        <!-- ANALYTICS -->
+        <section class="feature-card analytics-section" id="analytics">
+            <span class="section-eyebrow">PERFORMANCE INSIGHTS</span>
+            <h4>Task Analytics</h4>
+            <p class="muted-text">A breakdown of your current productivity.</p>
+
+            <div class="analytics-summary">
+                <div>
+                    <span class="muted-text">Completion rate</span>
+                    <h2>{{ productivity }}%</h2>
+                </div>
+                <div>
+                    <span class="muted-text">Completed</span>
+                    <h2>{{ completed_count }}</h2>
+                </div>
+                <div>
+                    <span class="muted-text">Pending</span>
+                    <h2>{{ pending_count }}</h2>
+                </div>
+            </div>
+
+            <h5>Task Status</h5>
+            <div class="analytics-bar-row">
+                <span>Completed</span>
+                <div class="custom-progress">
+                    <div class="custom-progress-fill" style="width: {{ productivity }}%"></div>
+                </div>
+                <strong>{{ completed_count }}</strong>
+            </div>
+            <div class="analytics-bar-row">
+                <span>Pending</span>
+                <div class="custom-progress">
+                    <div class="custom-progress-fill" style="width: {{ (pending_count * 100 / total_count) if total_count else 0 }}%"></div>
+                </div>
+                <strong>{{ pending_count }}</strong>
+            </div>
+
+            <h5>Priority Breakdown</h5>
+            {% for priority, count in priority_counts.items() %}
+            <div class="analytics-bar-row">
+                <span>{{ priority }}</span>
+                <div class="custom-progress">
+                    <div class="custom-progress-fill" style="width: {{ (count * 100 / total_count) if total_count else 0 }}%"></div>
+                </div>
+                <strong>{{ count }}</strong>
+            </div>
+            {% endfor %}
+
+            <h5>Categories</h5>
+            {% for category, count in category_counts.items() %}
+            <div class="mini-task">
+                <span>{{ category }}</span>
+                <strong>{{ count }} task(s)</strong>
+            </div>
+            {% else %}
+            <p class="muted-text">Categories will appear when you add tasks.</p>
+            {% endfor %}
+        </section>
+
         <!-- TASKS AND ADD TASK -->
         <section class="content-grid" id="tasks">
 
@@ -175,6 +351,18 @@
                         <p>
                             {{ task.description or "No description provided." }}
                         </p>
+
+                        <div class="task-meta">
+                            <strong class="priority-{{ (task.priority or 'Medium')|lower }}">
+                                {{ task.priority or 'Medium' }} priority
+                            </strong>
+                            {% if task.category %}
+                                <span>{{ task.category }}</span>
+                            {% endif %}
+                            {% if task.due_date %}
+                                <span>Due: {{ task.due_date.strftime('%d %b %Y') }}</span>
+                            {% endif %}
+                        </div>
 
                         <span class="status {% if task.completed %}done{% else %}pending{% endif %}">
                             {{ "✓ Completed" if task.completed else "◷ Pending" }}
@@ -222,7 +410,7 @@
             </div>
 
             <!-- ADD TASK FORM -->
-            <div class="add-section">
+            <div class="add-section" id="add-task">
 
                 <div class="section-heading">
                     <div>
@@ -256,6 +444,31 @@
                         placeholder="Describe your task..."
                     ></textarea>
 
+                    <label for="due_date">Due Date</label>
+                    <input
+                        type="date"
+                        id="due_date"
+                        name="due_date"
+                        class="form-control"
+                    >
+
+                    <label for="priority">Priority</label>
+                    <select id="priority" name="priority" class="form-control">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                    </select>
+
+                    <label for="category">Category</label>
+                    <input
+                        type="text"
+                        id="category"
+                        name="category"
+                        class="form-control"
+                        maxlength="80"
+                        placeholder="e.g. College, Personal, Work"
+                    >
+
                     <button type="submit" class="add-button">
                         + Add New Task
                     </button>
@@ -274,10 +487,76 @@
         <!-- FOOTER -->
         <footer class="footer">
             <span>✦ TaskFlow</span>
-            <span>DevOps Capstone Project · Built for productivity</span>
+            <span>Plan thoughtfully. Make progress daily.</span>
         </footer>
 
     </main>
 </div>
 </body>
 </html>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "action-btn edit-btn";
+    toggle.textContent = "Dark mode";
+    document.querySelector(".top-header").appendChild(toggle);
+
+    function setDark(enabled) {
+        document.body.classList.toggle("dark-mode", enabled);
+        toggle.textContent = enabled ? "Light mode" : "Dark mode";
+        localStorage.setItem("taskflow-theme", enabled ? "dark" : "light");
+    }
+
+    setDark(localStorage.getItem("taskflow-theme") === "dark");
+    toggle.addEventListener("click", () => {
+        setDark(!document.body.classList.contains("dark-mode"));
+    });
+
+    let seconds = 1500;
+    let interval = null;
+    const display = document.getElementById("timerDisplay");
+    const start = document.getElementById("timerStart");
+    const reset = document.getElementById("timerReset");
+
+    if (!display || !start || !reset) return;
+
+    function updateTimer() {
+        display.textContent =
+            String(Math.floor(seconds / 60)).padStart(2, "0") + ":" +
+            String(seconds % 60).padStart(2, "0");
+    }
+
+    start.addEventListener("click", () => {
+        if (interval) {
+            clearInterval(interval);
+            interval = null;
+            start.textContent = "Resume";
+            return;
+        }
+
+        start.textContent = "Pause";
+        interval = setInterval(() => {
+            seconds--;
+            updateTimer();
+            if (seconds <= 0) {
+                clearInterval(interval);
+                interval = null;
+                start.textContent = "Start";
+                alert("Focus session complete. Well done!");
+            }
+        }, 1000);
+    });
+
+    reset.addEventListener("click", () => {
+        clearInterval(interval);
+        interval = null;
+        seconds = 1500;
+        start.textContent = "Start";
+        updateTimer();
+    });
+
+    updateTimer();
+});
+</script>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TaskFlow | {{ title }}</title>
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+/* TaskFlow workspace — consistent pink and ivory theme */
+body {
+    background: #FAF7F5;
+    color: #292323;
+}
+.main-content {
+    background: #FAF7F5;
+}
+.workspace-page {
+    width: 100%;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #FFF1F3, #FFFAFA);
+    border: 1px solid #EED5D9;
+    border-radius: 18px;
+    padding: 30px;
+    margin-top: 25px;
+    box-shadow: 0 12px 35px rgba(120,70,75,.07);
+}
+.workspace-page h3 {
+    color: #754B52;
+    font-size: 21px;
+    line-height: 1.4;
+    margin: 0 0 20px;
+}
+.workspace-page p {
+    font-size: 15px;
+    line-height: 1.65;
+    margin: 12px 0;
+}
+.workspace-page table {
+    width: 100%;
+    min-width: 680px;
+    border-collapse: collapse;
+    table-layout: auto;
+    margin-top: 18px;
+    font-size: 15px;
+    line-height: 1.55;
+}
+.workspace-page th,
+.workspace-page td {
+    padding: 14px 16px;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid #EEDDE0;
+}
+.workspace-page th {
+    background: #F7E5E8;
+    color: #754B52;
+    font-weight: 650;
+}
+.workspace-page td {
+    background: rgba(255,255,255,.45);
+}
+.workspace-page tr:hover td {
+    background: #FFF0F2;
+}
+.workspace-page input,
+.workspace-page select {
+    display: block;
+    width: 100%;
+    max-width: 520px;
+    padding: 12px 14px;
+    margin: 8px 0 20px;
+    border: 1px solid #EAD1D5;
+    border-radius: 9px;
+    background: #FFF7F8;
+    color: #292323;
+    font-size: 15px;
+}
+.workspace-page input:focus,
+.workspace-page select:focus {
+    border-color: #C77F8B;
+    outline: 2px solid rgba(199,127,139,.15);
+}
+.workspace-page button,
+.workspace-page .page-button {
+    display: inline-block;
+    padding: 9px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: #C77F8B;
+    color: white;
+    font-size: 14px;
+    line-height: 1.4;
+    text-decoration: none;
+    cursor: pointer;
+}
+.workspace-page button:hover,
+.workspace-page .page-button:hover {
+    background: #B96F7D;
+    color: white;
+}
+.workspace-page td form {
+    display: inline-block;
+    margin: 2px;
+}
+.workspace-page .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 16px;
+}
+.workspace-page .metric {
+    padding: 20px;
+    border-radius: 12px;
+    background: #F7E5E8;
+}
+.workspace-page .metric strong {
+    display: block;
+    font-size: 28px;
+}
+.workspace-page .bar {
+    height: 10px;
+    background: #F4E4E7;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 8px 0 18px;
+}
+.workspace-page .bar span {
+    display: block;
+    height: 100%;
+    background: #C77F8B;
+}
+
+/* Shared dark theme — all workspace pages */
+body.dark-mode {
+    background: #211d20 !important;
+    color: #F5EDF0 !important;
+}
+body.dark-mode .main-content {
+    background: #211d20 !important;
+    color: #F5EDF0 !important;
+}
+body.dark-mode .sidebar {
+    background: #302A2E !important;
+    color: #F5EDF0 !important;
+    border-color: #51434A !important;
+}
+body.dark-mode .workspace-page {
+    background: linear-gradient(135deg, #302A2E, #282226) !important;
+    color: #F5EDF0 !important;
+    border-color: #51434A !important;
+}
+body.dark-mode .workspace-page h1,
+body.dark-mode .workspace-page h2,
+body.dark-mode .workspace-page h3,
+body.dark-mode .workspace-page h4,
+body.dark-mode .workspace-page h5,
+body.dark-mode .workspace-page p,
+body.dark-mode .workspace-page label,
+body.dark-mode .workspace-page td,
+body.dark-mode .workspace-page th {
+    color: #F5EDF0 !important;
+}
+body.dark-mode .workspace-page th,
+body.dark-mode .workspace-page .metric {
+    background: #49323B !important;
+}
+body.dark-mode .workspace-page td {
+    background: #302A2E !important;
+    border-color: #51434A !important;
+}
+body.dark-mode .workspace-page tr:hover td {
+    background: #3B3036 !important;
+}
+body.dark-mode .workspace-page input,
+body.dark-mode .workspace-page select {
+    background: #393137 !important;
+    color: #F5EDF0 !important;
+    border-color: #51434A !important;
+}
+body.dark-mode .workspace-page input::placeholder {
+    color: #C1AFB6 !important;
+}
+body.dark-mode .workspace-page a:not(.page-button) {
+    color: #F2C4CF;
+}
+body.dark-mode .workspace-page .bar {
+    background: #51434A !important;
+}
+@media (max-width: 800px) {
+    .workspace-page {
+        padding: 20px;
+    }
+    .workspace-page .metric-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+<div class="app-layout">
+<aside class="sidebar">
+    <h3 class="brand">✦ TaskFlow</h3>
+    <p class="sidebar-label">WORKSPACE</p>
+    <a class="nav-link" href="{{ url_for('dashboard') }}">▦ Overview</a>
+    <a class="nav-link" href="{{ url_for('my_tasks') }}">✓ My Tasks</a>
+    <a class="nav-link" href="{{ url_for('add_task_page') }}">＋ Add Task</a>
+    <a class="nav-link" href="{{ url_for('completed_tasks') }}">✓ Completed</a>
+    <p class="sidebar-label">PRODUCTIVITY</p>
+    <a class="nav-link" href="{{ url_for('analytics_page') }}">▥ Analytics</a>
+    <a class="nav-link" href="{{ url_for('calendar') }}">▦ Calendar</a>
+    <a class="nav-link" href="{{ url_for('activity_page') }}">◷ Activity</a>
+    <p class="sidebar-label">ACCOUNT</p>
+    <a class="nav-link" href="{{ url_for('profile') }}">◎ Profile</a>
+    <a class="nav-link" href="{{ url_for('settings_page') }}">⚙ Settings</a>
+    <div class="sidebar-bottom">
+        <div class="user-info">
+            <div class="user-avatar">{{ current_user.username[0]|upper }}</div>
+            <div><strong>{{ current_user.username }}</strong><small>Account</small></div>
+        </div>
+        <a class="logout-link" href="{{ url_for('logout') }}">↪ Logout</a>
+    </div>
+</aside>
+<main class="main-content">
+<header class="top-header">
+    <div><p class="eyebrow">TASKFLOW WORKSPACE</p><h2>{{ title }}</h2>
+    <p>Organize your work and keep moving forward.</p></div>
+    <a class="page-button" href="{{ url_for('dashboard') }}">Back to Overview</a>
+</header>
+{% with messages = get_flashed_messages() %}
+{% for message in messages %}<div class="alert alert-info">{{ message }}</div>{% endfor %}
+{% endwith %}
+<section class="workspace-page">
+
+
+{% if page == "tasks" %}
+<h3>Your task list</h3>
+<p>Search, filter and manage all your tasks.</p>
+<input id="taskSearch" type="search" placeholder="Search tasks..." style="max-width:100%">
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+<button type="button" class="task-filter" data-filter="all">All</button>
+<button type="button" class="task-filter" data-filter="pending">Pending</button>
+<button type="button" class="task-filter" data-filter="completed">Completed</button>
+</div>
+{% if tasks %}
+<table id="taskTable">
+<tr><th>Task</th><th>Priority</th><th>Due date</th><th>Status</th><th>Actions</th></tr>
+{% for task in tasks %}
+<tr class="task-row" data-status="{{ 'completed' if task.completed else 'pending' }}">
+<td><strong>{{ task.title }}</strong><br><small>{{ task.description or '' }}</small><br><small>{{ task.category or 'Uncategorized' }}</small></td>
+<td>{{ task.priority or 'Medium' }}</td>
+<td>{{ task.due_date.strftime('%d %b %Y') if task.due_date else '—' }}</td>
+<td>{{ 'Completed' if task.completed else 'Pending' }}</td>
+<td style="white-space:nowrap">
+<form method="POST" action="{{ url_for('complete_task', task_id=task.id) }}" style="display:inline">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<button type="submit">{{ 'Undo' if task.completed else 'Complete' }}</button>
+</form>
+<a class="page-button" href="{{ url_for('edit_task', task_id=task.id) }}">Edit</a>
+<form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}" style="display:inline" onsubmit="return confirm('Delete this task?')">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<button type="submit">Delete</button>
+</form>
+</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<p>No tasks yet. Add your first task.</p>
+{% endif %}
+
+{% elif page == "add_task" %}
+<h3>Create a new task</h3>
+<p>Add details and organize your work.</p>
+<form method="POST" action="{{ url_for('add_task') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label for="new_title">Task title</label>
+<input id="new_title" name="title" maxlength="200" required placeholder="Enter task title">
+<label for="new_description">Description</label>
+<input id="new_description" name="description" maxlength="500" placeholder="Describe your task">
+<label for="new_due_date">Due date</label>
+<input id="new_due_date" type="date" name="due_date">
+<label for="new_priority">Priority</label>
+<select id="new_priority" name="priority">
+<option>Low</option><option selected>Medium</option><option>High</option>
+</select>
+<label for="new_category">Category</label>
+<input id="new_category" name="category" maxlength="80" placeholder="College, Personal, Work...">
+<button type="submit">Create Task</button>
+</form>
+
+{% elif page == "completed" %}
+<h3>Your completed tasks</h3>
+{% if tasks %}
+<table><tr><th>Task</th><th>Category</th><th>Priority</th><th>Due date</th></tr>
+{% for task in tasks %}
+<tr><td>{{ task.title }}</td><td>{{ task.category or "—" }}</td>
+<td>{{ task.priority or "Medium" }}</td>
+<td>{{ task.due_date.strftime('%d %b %Y') if task.due_date else "—" }}</td></tr>
+{% endfor %}</table>
+{% else %}<p>No completed tasks yet. Complete a task to see it here.</p>{% endif %}
+
+{% elif page == "calendar" %}
+<h3>Tasks by due date</h3>
+{% if tasks %}
+<table><tr><th>Due date</th><th>Task</th><th>Status</th><th>Priority</th></tr>
+{% for task in tasks %}
+<tr><td>{{ task.due_date.strftime('%A, %d %b %Y') }}</td>
+<td>{{ task.title }}</td><td>{{ "Completed" if task.completed else "Pending" }}</td>
+<td>{{ task.priority or "Medium" }}</td></tr>
+{% endfor %}</table>
+{% else %}<p>No dated tasks yet. Add a due date when creating a task.</p>{% endif %}
+
+{% elif page == "activity" %}
+<h3>Your activity history</h3>
+{% if activities %}
+<table><tr><th>Action</th><th>Details</th><th>Date and time</th></tr>
+{% for item in activities %}
+<tr><td>{{ item.action|title }}</td><td>{{ item.details }}</td>
+<td>{{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}</td></tr>
+{% endfor %}</table>
+{% else %}<p>No activity recorded yet.</p>{% endif %}
+
+{% elif page == "analytics" %}
+<h3>Productivity overview</h3>
+<div class="metric-grid">
+<div class="metric">Total tasks<strong>{{ total }}</strong></div>
+<div class="metric">Completed<strong>{{ completed }}</strong></div>
+<div class="metric">Pending<strong>{{ pending }}</strong></div>
+</div>
+<h3 style="margin-top:28px">Completion rate — {{ productivity }}%</h3>
+<div class="bar"><span style="width:{{ productivity }}%"></span></div>
+<h3>Priority breakdown</h3>
+{% for name,count in priorities.items() %}
+<p>{{ name }}: <strong>{{ count }}</strong></p>
+<div class="bar"><span style="width:{{ count * 100 / total if total else 0 }}%"></span></div>
+{% endfor %}
+<h3>Categories</h3>
+{% for name,count in categories.items() %}
+<p>{{ name }} — {{ count }} task(s)</p>
+{% else %}<p>No categories yet.</p>{% endfor %}
+
+{% elif page == "profile" %}
+<h3>Account information</h3>
+<form method="POST">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>Username</label><input value="{{ current_user.username }}" disabled>
+<label>Full name</label>
+<input name="full_name" maxlength="150" value="{{ current_user.full_name or '' }}" placeholder="Your full name">
+<label>Email address</label>
+<input type="email" name="email" maxlength="255" value="{{ current_user.email or '' }}" placeholder="you@example.com">
+<button type="submit">Save Profile</button>
+</form>
+
+{% elif page == "settings" %}
+<h3>Appearance</h3>
+<p>Choose how TaskFlow looks on this browser.</p>
+<label for="themeChoice">Theme preference</label>
+<select id="themeChoice">
+<option value="light">Light — Pink and Ivory</option>
+<option value="dark">Dark mode</option>
+</select>
+<button type="button" id="saveTheme">Save Appearance</button>
+<p id="settingsMessage" aria-live="polite"></p>
+</section>
+<script>
+const choice = document.getElementById("themeChoice");
+const message = document.getElementById("settingsMessage");
+choice.value = localStorage.getItem("taskflow-theme") || "light";
+document.getElementById("saveTheme").addEventListener("click", () => {
+    const theme = choice.value;
+    localStorage.setItem("taskflow-theme", theme);
+    document.body.classList.toggle("dark-mode", theme === "dark");
+    message.textContent = "Appearance preference saved in this browser.";
+});
+document.body.classList.toggle("dark-mode", choice.value === "dark");
+</script>
+{% endif %}
+</section>
+</main>
+</div>
+{% if page == "tasks" %}
+<script>
+const searchBox = document.getElementById("taskSearch");
+let selectedFilter = "all";
+function filterTasks() {
+    const query = searchBox.value.toLowerCase();
+    document.querySelectorAll(".task-row").forEach(row => {
+        const matchesText = row.innerText.toLowerCase().includes(query);
+        const matchesStatus = selectedFilter === "all" || row.dataset.status === selectedFilter;
+        row.hidden = !(matchesText && matchesStatus);
+    });
+}
+searchBox.addEventListener("input", filterTasks);
+document.querySelectorAll(".task-filter").forEach(button => {
+    button.addEventListener("click", () => {
+        selectedFilter = button.dataset.filter;
+        filterTasks();
+    });
+});
+</script>
+{% endif %}
+
+<script>
+(function () {
+    const applyTaskFlowTheme = () => {
+        const dark = localStorage.getItem("taskflow-theme") === "dark";
+        document.body.classList.toggle("dark-mode", dark);
+    };
+    applyTaskFlowTheme();
+})();
+</script>
+
+</body>
+</html>

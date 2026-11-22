@@ -27,3 +27,4 @@ terraform/tfplan
 
 # Generated coverage report
 coverage.xml
+backups/

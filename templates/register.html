@@ -1,38 +1,200 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Register | TaskFlow</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="theme-color" content="#FAF7F5">
+    <title>Create Account | TaskFlow</title>
+    <link rel="icon" type="image/svg+xml"
+          href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-<div class="container auth-container">
-    <div class="card auth-card">
-        <h2 class="text-center mb-2">Create Account</h2>
-        <p class="text-center text-muted">Join TaskFlow today.</p>
+<body class="auth-page">
 
-        {% with messages = get_flashed_messages() %}
-            {% for message in messages %}
-                <div class="alert alert-info">{{ message }}</div>
-            {% endfor %}
-        {% endwith %}
+<div class="auth-shell">
 
-        <form method="POST">
-<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" name="username" class="form-control" required>
+    <section class="auth-brand-panel">
+        <a href="{{ url_for('home') }}" class="auth-brand">
+            <span class="brand-mark">✓</span>
+            <span>TaskFlow</span>
+        </a>
+
+        <div class="brand-message">
+            <span class="eyebrow">A FRESH START BEGINS HERE</span>
+            <h1>Turn your plans<br>into progress.</h1>
+            <p>
+                Create your personal workspace, organize
+                your priorities and make every day count.
+            </p>
+
+            <div class="brand-features">
+                <div><span>✓</span> Manage your daily tasks</div>
+                <div><span>✓</span> Stay on top of deadlines</div>
+                <div><span>✓</span> Celebrate your progress</div>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Password (minimum 8 characters)</label>
-                <input type="password" name="password" class="form-control" minlength="8" required>
+        </div>
+
+        <div class="brand-decoration" aria-hidden="true">
+            <div class="decoration-card">
+                <div class="decoration-heading">Your next chapter</div>
+                <div class="decoration-task">
+                    <span class="decoration-check">✓</span>
+                    Set your first goal
+                </div>
+                <div class="decoration-task">
+                    <span class="decoration-check">✓</span>
+                    Build a better routine
+                </div>
+                <div class="decoration-task">
+                    <span class="decoration-circle"></span>
+                    Keep moving forward
+                </div>
+                <div class="decoration-progress">
+                    <span></span>
+                </div>
+                <small>Great things start small!</small>
             </div>
-            <button class="btn btn-primary w-100">Register</button>
-        </form>
-        <p class="text-center mt-3">Already registered? <a href="{{ url_for('login') }}">Login</a></p>
-    </div>
+        </div>
+
+        <p class="brand-footer">Your goals deserve a place to grow.</p>
+    </section>
+
+    <section class="auth-form-panel">
+        <div class="auth-form-wrap">
+
+            <div class="mobile-brand">
+                <span class="brand-mark">✓</span>
+                <span>TaskFlow</span>
+            </div>
+
+            <div class="auth-heading">
+                <span class="eyebrow">GET STARTED</span>
+                <h2>Create your account</h2>
+                <p>Join TaskFlow and bring your plans together.</p>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+                {% for message in messages %}
+                    <div class="auth-alert" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+
+            <form method="POST" class="auth-form">
+                <input type="hidden" name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input
+                        type="text"
+                        id="full_name"
+                        name="full_name"
+                        placeholder="Enter your full name"
+                        autocomplete="name"
+                        maxlength="150"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        maxlength="255"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Choose a username"
+                        autocomplete="username"
+                        maxlength="100"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-field">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Minimum 8 characters"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required>
+                        <button type="button"
+                                class="password-toggle"
+                                onclick="togglePassword('password', this)"
+                                aria-label="Show password">
+                            Show
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <div class="password-field">
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Enter your password again"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required>
+                        <button type="button"
+                                class="password-toggle"
+                                onclick="togglePassword('confirm_password', this)"
+                                aria-label="Show password">
+                            Show
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-button">
+                    Create Account <span>→</span>
+                </button>
+            </form>
+
+            <p class="auth-switch">
+                Already have an account?
+                <a href="{{ url_for('login') }}">Sign In</a>
+            </p>
+
+            <p class="auth-terms">
+                Your personal workspace starts here.
+            </p>
+
+        </div>
+    </section>
+
 </div>
+
+<script>
+function togglePassword(id, button) {
+    const field = document.getElementById(id);
+    const showing = field.type === "text";
+
+    field.type = showing ? "password" : "text";
+    button.textContent = showing ? "Show" : "Hide";
+    button.setAttribute(
+        "aria-label",
+        showing ? "Show password" : "Hide password"
+    );
+}
+</script>
+
 </body>
 </html>
