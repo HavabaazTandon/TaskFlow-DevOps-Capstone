@@ -233,3 +233,5 @@ The repository contains the TaskFlow application and configurations for source c
 **Project:** TaskFlow – DevOps Automation Capstone  
 **Course:** ENSP461 – DevOps & Automation Lab  
 **Programme:** B.Tech Computer Science and Engineering
+### CI/CD Verification
+Jenkins pipeline automatic trigger verification.
